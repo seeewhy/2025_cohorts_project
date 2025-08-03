@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title> Welcome you all to the POM Java SpringBot project for the year 2025 in Ontario </title>
   </head>
