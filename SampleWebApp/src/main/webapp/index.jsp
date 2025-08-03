@@ -3,7 +3,7 @@
   <head>
     <title> Welcome you all to the POM Java SpringBot project for the year 2025 in Ontario </title>
   </head>
-  <body bgcolor="#00FF00">
+  <body>
     <h1>This Java CLoud Springbot 2025 Application Form by Obinna Real Cloud Experts</h1>
     <h1>This Java CLoud Springbot 2025 Application Form by OlisaEmeka Real Cloud Experts</h1>
     <h1>This Java CLoud Springbot 2025 Application Form by Efe Real Cloud Experts</h1>
