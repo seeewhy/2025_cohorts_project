@@ -1,4 +1,4 @@
-name: Build and Deploy Java Application into Tomcat Server on EC2 using Code Analysis and Quality Gate 
+name: Build and Deploy Java Application into Tomcat Server on EC2 using Code Analysis and Quality Gate
 
 on:
   push:
@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
     - name: Set up JDK 11
       uses: actions/setup-java@v2
@@ -23,30 +24,37 @@ jobs:
     - name: Run Unit Tests
       run: mvn test -f SampleWebApp/pom.xml
 
-    - name: SonarQube Analysis Scan 
+    - name: SonarQube Analysis Scan
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
-        mvn -f SampleWebApp/pom.xml \
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+        mvn -B -f SampleWebApp/pom.xml \
+          org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar \
           -Dsonar.projectKey=SampleWebApp \
           -Dsonar.host.url=${SONAR_HOST_URL} \
           -Dsonar.login=${SONAR_TOKEN}
-      
-    # Check the Quality Gate status.
+
+    - name: Verify SonarQube report-task.txt was created
+      run: |
+        if [ ! -f SampleWebApp/.scannerwork/report-task.txt ]; then
+          echo "❌ SonarQube analysis failed: report-task.txt not found."
+          exit 1
+        else
+          echo "✅ SonarQube analysis report-task.txt found."
+        fi
+
     - name: SonarQube Quality Gate check
       id: sonarqube-quality-gate-check
       uses: sonarsource/sonarqube-quality-gate-action@master
       with:
+        projectBaseDir: SampleWebApp
         pollingTimeoutSec: 600
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      # Optionally you can use the output from the Quality Gate in another step.
-      # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
-    - name: "Example show SonarQube Quality Gate Status value"
+    - name: Show SonarQube Quality Gate Status
       run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
 
     - name: Upload WAR Artifact
