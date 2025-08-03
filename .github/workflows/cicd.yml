@@ -1,8 +1,8 @@
-name: Build and Deploy Java Application into Tomcat Server on EC2
+name: Build and Deploy Java Application into Tomcat Server on EC2 and run Code Analysis with Sonarqube
 
 on:
   push:
-    branches: [ "production" ]
+    branches: [ "production-main" ]
 
 jobs:
   build-and-deploy:
@@ -22,6 +22,17 @@ jobs:
 
     - name: Run Unit Tests
       run: mvn test -f SampleWebApp/pom.xml
+
+    - name: SonarQube Analysis Scan 
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  
+        run: |
+          mvn -f SampleWebApp/pom.xml \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=SampleWebApp \
+            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.login=${SONAR_TOKEN}
 
     - name: Upload WAR Artifact
       uses: actions/upload-artifact@v4
